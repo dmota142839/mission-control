@@ -2153,6 +2153,7 @@ interface FileEntry {
   name: string
   exists: boolean
   content: string
+  optional?: boolean
 }
 
 export function FilesTab({ agent }: { agent: Agent }) {
@@ -2180,6 +2181,7 @@ export function FilesTab({ agent }: { agent: Agent }) {
         name,
         exists: Boolean(value?.exists),
         content: String(value?.content || ''),
+        optional: Boolean(value?.optional),
       }))
       setFiles(entries)
     } catch (err: any) {
@@ -2240,6 +2242,7 @@ export function FilesTab({ agent }: { agent: Agent }) {
           {workspace && (
             <p className="text-xs text-muted-foreground font-mono mt-0.5">{workspace}</p>
           )}
+          <p className="text-xs text-muted-foreground mt-1.5 max-w-xl">{t('workspaceFilesOptionalHint')}</p>
         </div>
         <Button onClick={loadFiles} size="sm" variant="secondary" disabled={loading}>
           {loading ? '...' : t('refresh')}
@@ -2269,7 +2272,9 @@ export function FilesTab({ agent }: { agent: Agent }) {
               <div className="text-2xs mt-0.5">
                 {file.exists
                   ? t('charCount', { count: file.content.length })
-                  : <span className="text-amber-400">{t('missing')}</span>
+                  : file.optional
+                    ? <span className="text-muted-foreground">{t('optionalAbsent')}</span>
+                    : <span className="text-amber-400">{t('missing')}</span>
                 }
               </div>
             </button>
@@ -2288,7 +2293,15 @@ export function FilesTab({ agent }: { agent: Agent }) {
                 <div>
                   <span className="font-mono text-sm text-foreground">{activeEntry.name}</span>
                   {!activeEntry.exists && (
-                    <span className="ml-2 px-1.5 py-0.5 text-2xs bg-amber-500/20 text-amber-400 rounded">{t('missing')}</span>
+                    <span
+                      className={
+                        activeEntry.optional
+                          ? 'ml-2 px-1.5 py-0.5 text-2xs bg-muted/30 text-muted-foreground rounded'
+                          : 'ml-2 px-1.5 py-0.5 text-2xs bg-amber-500/20 text-amber-400 rounded'
+                      }
+                    >
+                      {activeEntry.optional ? t('optionalAbsent') : t('missing')}
+                    </span>
                   )}
                 </div>
                 <div className="flex gap-2">

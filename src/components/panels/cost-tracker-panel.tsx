@@ -366,7 +366,7 @@ function OverviewView({
             {trendChartData.length === 0 ? (
               <div className="h-full flex items-center justify-center text-muted-foreground text-sm">{t('noTrendData')}</div>
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                 <LineChart data={trendChartData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="time" /><YAxis />
@@ -386,7 +386,7 @@ function OverviewView({
             {modelData.length === 0 ? (
               <div className="h-full flex items-center justify-center text-muted-foreground text-sm">{t('noModelData')}</div>
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                 <BarChart data={modelData}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} interval={0} />
@@ -405,7 +405,7 @@ function OverviewView({
             {pieData.length === 0 ? (
               <div className="h-full flex items-center justify-center text-muted-foreground text-sm">{t('noCostData')}</div>
             ) : (
-              <ResponsiveContainer width="100%" height="100%">
+              <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                 <PieChart>
                   <Pie data={pieData} cx="50%" cy="50%" innerRadius={40} outerRadius={80} paddingAngle={5} dataKey="value">
                     {pieData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
@@ -527,7 +527,7 @@ function AgentsView({
       <div className="bg-card border border-border rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4">{t('perAgentCost')}</h2>
         <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
             <BarChart data={agents.slice(0, 12).map(a => ({
               name: a.agent.length > 12 ? a.agent.slice(0, 11) + '\u2026' : a.agent,
               cost: Number(a.total_cost.toFixed(4)),

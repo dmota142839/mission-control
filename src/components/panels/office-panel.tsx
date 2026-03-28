@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Loader } from '@/components/ui/loader'
 import { useMissionControl, Agent } from '@/store'
 import { buildOfficeLayout } from '@/lib/office-layout'
+import { agencyAgentsCategoryLabel } from '@/lib/agency-agents-divisions'
 
 type ViewMode = 'office' | 'org-chart'
 type OrgSegmentMode = 'category' | 'role' | 'status'
@@ -469,7 +470,8 @@ function pointAlongPath(path: Array<{ x: number; y: number }>, pathLengths: numb
 
 export function OfficePanel() {
   const t = useTranslations('office')
-  const { agents, dashboardMode, currentUser } = useMissionControl()
+  const { agents: agentsFromStore, dashboardMode, currentUser } = useMissionControl()
+  const agents = Array.isArray(agentsFromStore) ? agentsFromStore : []
   const isLocalMode = dashboardMode === 'local'
   const [localAgents, setLocalAgents] = useState<Agent[]>([])
   const [sessionAgents, setSessionAgents] = useState<Agent[]>([])
@@ -1450,12 +1452,26 @@ export function OfficePanel() {
   const categoryGroups = useMemo(() => {
     const groups = new Map<string, Agent[]>()
     const getCategory = (agent: Agent): string => {
+      const role = String(agent.role || '').toLowerCase()
+      // OpenClaw / Mission Control themes (identity.theme → agent.role)
+      if (role.includes('workflow · bug fix') || role.includes('workflow · bug-fix')) return 'Bug fix workflow'
+      if (role.includes('workflow · feature dev')) return 'Feature dev workflow'
+      if (role.includes('workflow · security audit')) return 'Security audit workflow'
+      if (role.includes('catalog ·')) return agencyAgentsCategoryLabel(agent)
+      if (role.includes('integration · wazo') || role.includes('wazo')) return 'Wazo'
+      if (role.includes('mission control · gateway')) return 'Gateway'
+      if (role.includes('mission control · session')) return 'MC sessions'
+      if (role.includes('core ·')) return 'Core'
+      if (role.includes('service ·')) return 'Services'
+
       const name = (agent.name || '').toLowerCase()
       if (name.startsWith('habi-')) return 'Habi Lanes'
       if (name.startsWith('ops-')) return 'Ops Automation'
       if (name.includes('canary')) return 'Canary'
       if (name.startsWith('main')) return 'Core'
       if (name.startsWith('remote-')) return 'Remote'
+
+      if (role && role !== 'agent') return agent.role
       return 'Other'
     }
 
@@ -1465,7 +1481,38 @@ export function OfficePanel() {
       groups.get(category)!.push(a)
     }
 
-    const order = ['Habi Lanes', 'Ops Automation', 'Core', 'Canary', 'Remote', 'Other']
+    const agencyDivisionOrder = [
+      'Academic',
+      'Design',
+      'Engineering',
+      'Game development',
+      'Marketing',
+      'Paid media',
+      'Product',
+      'Project management',
+      'Sales',
+      'Spatial computing',
+      'Specialized',
+      'Support',
+      'Testing',
+    ]
+    const order = [
+      'Core',
+      'Bug fix workflow',
+      'Feature dev workflow',
+      'Security audit workflow',
+      ...agencyDivisionOrder.map((d) => `Agency · ${d}`),
+      'Agency catalog',
+      'Wazo',
+      'MC sessions',
+      'Gateway',
+      'Services',
+      'Habi Lanes',
+      'Ops Automation',
+      'Canary',
+      'Remote',
+      'Other',
+    ]
     return new Map(
       [...groups.entries()].sort(([a], [b]) => {
         const ai = order.indexOf(a)

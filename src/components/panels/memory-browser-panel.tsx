@@ -600,7 +600,7 @@ export function MemoryBrowserPanel() {
         {/* Main content */}
         <div className="flex-1 min-w-0 flex flex-col bg-[hsl(var(--surface-0))]">
           {activeView === 'graph' && !isLocal ? (
-            <div className="flex-1 p-4 overflow-hidden flex flex-col"><MemoryGraph /></div>
+            <div className="flex-1 min-h-0 min-w-0 p-4 overflow-hidden flex flex-col"><MemoryGraph /></div>
           ) : activeView === 'health' ? (
             <div className="flex-1 overflow-auto p-6"><HealthView report={healthReport} isLoading={isLoadingHealth} onRefresh={loadHealth} /></div>
           ) : activeView === 'pipeline' ? (

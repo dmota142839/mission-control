@@ -38,7 +38,8 @@ function timeAgo(timestamp: number): string {
 
 export function ExecApprovalPanel() {
   const t = useTranslations('execApproval')
-  const { execApprovals, updateExecApproval } = useMissionControl()
+  const { execApprovals: execApprovalsRaw, updateExecApproval } = useMissionControl()
+  const execApprovals = Array.isArray(execApprovalsRaw) ? execApprovalsRaw : []
   const { sendMessage } = useWebSocket()
   const [filter, setFilter] = useState<FilterTab>('pending')
   const [view, setView] = useState<PanelView>('approvals')
@@ -191,7 +192,12 @@ function AllowlistEditor({ execApprovals }: { execApprovals: ExecApprovalRequest
         throw new Error(data.error || `HTTP ${res.status}`)
       }
       const data = await res.json()
-      setAgents(data.agents ?? {})
+      const raw = (data.agents && typeof data.agents === 'object') ? data.agents as Record<string, unknown> : {}
+      const normalized: AllowlistState = {}
+      for (const [id, patterns] of Object.entries(raw)) {
+        normalized[id] = Array.isArray(patterns) ? patterns as { pattern: string }[] : []
+      }
+      setAgents(normalized)
       setHash(data.hash ?? '')
       setDirty(false)
     } catch (err: any) {
@@ -244,7 +250,7 @@ function AllowlistEditor({ execApprovals }: { execApprovals: ExecApprovalRequest
   const updatePattern = (agentId: string, index: number, value: string) => {
     setAgents(prev => ({
       ...prev,
-      [agentId]: prev[agentId].map((p, i) => i === index ? { pattern: value } : p),
+      [agentId]: (prev[agentId] || []).map((p, i) => i === index ? { pattern: value } : p),
     }))
     setDirty(true)
   }
@@ -252,7 +258,7 @@ function AllowlistEditor({ execApprovals }: { execApprovals: ExecApprovalRequest
   const removePattern = (agentId: string, index: number) => {
     setAgents(prev => ({
       ...prev,
-      [agentId]: prev[agentId].filter((_, i) => i !== index),
+      [agentId]: (prev[agentId] || []).filter((_, i) => i !== index),
     }))
     setDirty(true)
   }
@@ -317,7 +323,7 @@ function AllowlistEditor({ execApprovals }: { execApprovals: ExecApprovalRequest
           <AgentAllowlistCard
             key={agentId}
             agentId={agentId}
-            patterns={agents[agentId]}
+            patterns={agents[agentId] ?? []}
             recentCommands={recentCommands}
             onAddPattern={() => addPattern(agentId)}
             onUpdatePattern={(i, v) => updatePattern(agentId, i, v)}

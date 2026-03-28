@@ -563,7 +563,7 @@ export function SecurityAuditPanel() {
                 <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">{t('noToolUsageData')}</div>
               ) : (
                 <div className="h-48">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                     <BarChart data={data.toolAudit}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="tool" angle={-45} textAnchor="end" height={60} interval={0} tick={{ fontSize: 10 }} />
@@ -656,7 +656,7 @@ export function SecurityAuditPanel() {
               <div className="h-48 flex items-center justify-center text-muted-foreground text-sm">{t('noTimelineData')}</div>
             ) : (
               <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                   <LineChart data={data.timeline.map(p => ({
                     ...p,
                     time: new Date(p.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),

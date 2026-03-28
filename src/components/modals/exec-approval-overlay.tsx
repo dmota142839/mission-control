@@ -40,7 +40,8 @@ function MetaRow({ label, value }: { label: string; value?: string | null }) {
 }
 
 export function ExecApprovalOverlay() {
-  const { execApprovals, updateExecApproval } = useMissionControl()
+  const { execApprovals: execApprovalsRaw, updateExecApproval } = useMissionControl()
+  const execApprovals = Array.isArray(execApprovalsRaw) ? execApprovalsRaw : []
   const { sendMessage } = useWebSocket()
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)

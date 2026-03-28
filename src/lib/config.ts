@@ -63,6 +63,23 @@ const defaultMemoryDir = (() => {
   return (openclawStateDir ? path.join(openclawStateDir, 'memory') : '') || path.join(defaultDataDir, 'memory')
 })()
 
+/** Restrict Memory browser to memory/ + knowledge-base/ only when those dirs exist under the workspace root. */
+function memoryAllowedPrefixesFor(
+  memoryDir: string,
+  workspaceDir: string
+): string[] {
+  if (!workspaceDir || !memoryDir) return []
+  try {
+    if (path.resolve(memoryDir) !== path.resolve(workspaceDir)) return []
+  } catch {
+    return []
+  }
+  const memRoot = path.join(workspaceDir, 'memory')
+  const kbRoot = path.join(workspaceDir, 'knowledge-base')
+  if (!fs.existsSync(memRoot) && !fs.existsSync(kbRoot)) return []
+  return ['memory/', 'knowledge-base/']
+}
+
 const resolvedGnapRepoPath =
   process.env.GNAP_REPO_PATH || path.join(configuredDataDir, '.gnap')
 
@@ -86,10 +103,7 @@ export const config = {
     (openclawStateDir ? path.join(openclawStateDir, 'logs') : ''),
   tempLogsDir: process.env.CLAWDBOT_TMP_LOG_DIR || '',
   memoryDir: defaultMemoryDir,
-  memoryAllowedPrefixes:
-    defaultMemoryDir === openclawWorkspaceDir
-      ? ['memory/', 'knowledge-base/']
-      : [],
+  memoryAllowedPrefixes: memoryAllowedPrefixesFor(defaultMemoryDir, openclawWorkspaceDir),
   soulTemplatesDir:
     process.env.OPENCLAW_SOUL_TEMPLATES_DIR ||
     (openclawStateDir ? path.join(openclawStateDir, 'templates', 'souls') : ''),

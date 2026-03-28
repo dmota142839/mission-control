@@ -19,8 +19,12 @@ const ALLOWED_FILES = new Set([
   'MISSION.md',
   'USER.md',
 ])
+/** OpenClaw lifecycle files many installs (e.g. agency-agents) omit; absence is not an error. */
+const OPTIONAL_WORKSPACE_FILES = new Set(['WORKING.md', 'MEMORY.md', 'MISSION.md'])
+
 const FILE_ALIASES: Record<string, string[]> = {
-  'agent.md': ['agent.md', 'AGENT.md', 'MISSION.md', 'USER.md'],
+  // Do not map USER.md or MISSION.md here—they are separate slots with distinct meaning.
+  'agent.md': ['agent.md', 'AGENT.md'],
   'identity.md': ['identity.md', 'IDENTITY.md'],
   'soul.md': ['soul.md', 'SOUL.md'],
   'WORKING.md': ['WORKING.md', 'working.md'],
@@ -69,14 +73,18 @@ export async function GET(
       ? [requested]
       : ['agent.md', 'identity.md', 'soul.md', 'WORKING.md', 'MEMORY.md', 'TOOLS.md', 'AGENTS.md', 'MISSION.md', 'USER.md']
 
-    const payload: Record<string, { exists: boolean; content: string }> = {}
+    const payload: Record<string, { exists: boolean; content: string; optional?: boolean }> = {}
     for (const file of files) {
       if (!ALLOWED_FILES.has(file)) {
         return NextResponse.json({ error: `Unsupported file: ${file}` }, { status: 400 })
       }
       const aliases = FILE_ALIASES[file] || [file]
       const match = readAgentWorkspaceFile(candidates, aliases)
-      payload[file] = { exists: match.exists, content: match.content }
+      payload[file] = {
+        exists: match.exists,
+        content: match.content,
+        optional: OPTIONAL_WORKSPACE_FILES.has(file),
+      }
     }
 
     return NextResponse.json({

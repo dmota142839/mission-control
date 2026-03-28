@@ -1,12 +1,22 @@
+/**
+ * SHA-256 (base64) of the inline theme bootstrap in src/app/layout.tsx.
+ * Allows that single static script when nonce is missing (e.g. CSP from an
+ * outer proxy that does not inject x-nonce for Server Components). If you
+ * change the script body, recompute: node -e "require('crypto').createHash('sha256').update(process.argv[1]).digest('base64')" '...script...'
+ */
+export const THEME_BOOT_INLINE_SCRIPT_SHA256 = 'RVYZvogfrHcnzbCYFcK9fIYAnk+MjdIWMwDAF+B09C4='
+
 export function buildMissionControlCsp(input: { nonce: string; googleEnabled: boolean }): string {
   const { nonce, googleEnabled } = input
+
+  const scriptExtra = googleEnabled ? ' https://accounts.google.com' : ''
 
   return [
     `default-src 'self'`,
     `base-uri 'self'`,
     `object-src 'none'`,
     `frame-ancestors 'none'`,
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' blob:${googleEnabled ? ' https://accounts.google.com' : ''}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'sha256-${THEME_BOOT_INLINE_SCRIPT_SHA256}' blob:${scriptExtra}`,
     `style-src 'self' 'unsafe-inline'`,
     `style-src-elem 'self' 'unsafe-inline'`,
     `style-src-attr 'unsafe-inline'`,

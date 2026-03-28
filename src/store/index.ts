@@ -881,7 +881,8 @@ export const useMissionControl = create<MissionControlStore>()(
 
     // Exec Approvals
     execApprovals: [],
-    setExecApprovals: (approvals) => set({ execApprovals: approvals }),
+    setExecApprovals: (approvals) =>
+      set({ execApprovals: Array.isArray(approvals) ? approvals : [] }),
     addExecApproval: (approval) =>
       set((state) => {
         if (state.execApprovals.some(a => a.id === approval.id)) return state
@@ -1014,7 +1015,8 @@ export const useMissionControl = create<MissionControlStore>()(
     // Mission Control Phase 2 - Agents
     agents: [],
     selectedAgent: null,
-    setAgents: (agents) => set({ agents }),
+    setAgents: (agents) =>
+      set({ agents: Array.isArray(agents) ? agents : [] }),
     setSelectedAgent: (agent) => set({ selectedAgent: agent }),
     addAgent: (agent) =>
       set((state) => ({

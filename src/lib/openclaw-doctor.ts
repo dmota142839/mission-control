@@ -123,6 +123,38 @@ function detectCategory(raw: string, issues: string[]): OpenClawDoctorCategory {
   return 'general'
 }
 
+/**
+ * Informational bullets OpenClaw prints on a healthy, running gateway (locks, other services,
+ * LAN bind notice, etc.). These are not actionable Mission Control incidents — hide them so the
+ * doctor banner does not stay up forever on a normal setup.
+ */
+function isInformationalDoctorIssue(issue: string): boolean {
+  const s = issue.toLowerCase()
+
+  if (/^found\s+\d+\s+session lock file/i.test(issue)) return true
+  if (/\bpid=\d+\s*\(alive\)|\bstale=no\b|\bstale=yes\b/.test(s)) return true
+  if (/\.jsonl\.lock\b/.test(issue)) return true
+
+  if (/\/agents\/[^/\s]+\/sessions\//i.test(issue)) {
+    if (!/missing|orphan|transcript|not referenced|prune|cleanup|enforce|integrity/i.test(s)) return true
+  }
+
+  if (/\.service\b/.test(issue)) return true
+  if (/\(user,\s*unit:/i.test(issue)) return true
+
+  if (/^warning:\s*gateway bound/i.test(s)) return true
+  if (/gateway bound to\s*["']?lan["']?/.test(s) && /network-accessible|0\.0\.0\.0/.test(s)) return true
+  if (/ensure your auth credentials are strong/i.test(s)) return true
+
+  if (/requireMention|botfather|\/setprivacy|telegram default:/i.test(s)) return true
+
+  if (/systemctl.*disable.*openclaw-gateway|rm ~\/\.config\/systemd\/user\/openclaw-gateway/i.test(s)) {
+    return true
+  }
+
+  return false
+}
+
 export function parseOpenClawDoctorOutput(
   rawOutput: string,
   exitCode = 0,
@@ -139,26 +171,25 @@ export function parseOpenClawDoctorOutput(
     .map(line => line.replace(/^[-*]\s+/, '').trim())
     .filter(line => !isSessionAgingLine(line) && !isStateDirectoryListLine(line) && !isPositiveOrInstructionalLine(line))
 
-  // Strip positive/negated phrases before checking for warning keywords
-  const rawForWarningCheck = raw.replace(/\bno\s+\w+\s+(?:security\s+)?warnings?\s+detected\b/gi, '')
-  const mentionsWarnings = /\bwarning|warnings|problem|problems|invalid config|fix\b/i.test(rawForWarningCheck)
-  const mentionsHealthy = /\bok\b|\bhealthy\b|\bno issues\b|\bno\b.*\bwarnings?\s+detected\b|\bvalid\b/i.test(raw)
+  const filteredIssues = issues.filter(line => !isInformationalDoctorIssue(line))
+
+  const fatalSignals = /invalid config|\bfailed\b|\berror\b/i.test(raw)
 
   let level: OpenClawDoctorLevel = 'healthy'
-  if (exitCode !== 0 || /invalid config|failed|error/i.test(raw)) {
-    level = 'error'
-  } else if (issues.length > 0 || mentionsWarnings) {
+  if (exitCode !== 0) {
+    level = fatalSignals ? 'error' : 'warning'
+  } else if (filteredIssues.length > 0) {
     level = 'warning'
-  } else if (!mentionsHealthy && lines.length > 0) {
+  } else if (/invalid config|config invalid|unrecognized key|invalid option/i.test(raw)) {
     level = 'warning'
   }
 
-  const category = detectCategory(raw, issues)
+  const category = detectCategory(raw, filteredIssues)
 
   const summary =
     level === 'healthy'
       ? 'OpenClaw doctor reports a healthy configuration.'
-      : issues[0] ||
+      : filteredIssues[0] ||
         lines.find(line =>
           !/^run:/i.test(line) &&
           !/^file:/i.test(line) &&
@@ -174,7 +205,7 @@ export function parseOpenClawDoctorOutput(
     category,
     healthy: level === 'healthy',
     summary,
-    issues,
+    issues: filteredIssues,
     canFix,
     raw,
   }

@@ -818,7 +818,7 @@ export function TokenDashboardPanel() {
                 {prepareTrendChartData().length === 0 ? (
                   <div className="h-full flex items-center justify-center text-muted-foreground text-sm">{t('noTrendData')}</div>
                 ) : (
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                   <LineChart data={prepareTrendChartData()}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="time" />
@@ -852,7 +852,7 @@ export function TokenDashboardPanel() {
                 {prepareModelChartData().length === 0 ? (
                   <div className="h-full flex items-center justify-center text-muted-foreground text-sm">{t('noModelUsageData')}</div>
                 ) : (
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                   <BarChart data={prepareModelChartData()}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis
@@ -878,7 +878,7 @@ export function TokenDashboardPanel() {
                 {preparePieChartData().length === 0 ? (
                   <div className="h-full flex items-center justify-center text-muted-foreground text-sm">{t('noCostData')}</div>
                 ) : (
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                   <PieChart>
                     <Pie
                       data={preparePieChartData()}
@@ -910,7 +910,7 @@ export function TokenDashboardPanel() {
                 ) : (
                 <div className="flex h-full">
                   <div className="flex-1">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                       <PieChart>
                         <Pie
                           data={prepareProviderPieData()}

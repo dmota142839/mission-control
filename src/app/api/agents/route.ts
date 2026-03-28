@@ -30,8 +30,15 @@ export async function GET(request: NextRequest) {
     const status = searchParams.get('status');
     const role = searchParams.get('role');
     const showHidden = searchParams.get('show_hidden') === 'true';
-    const limit = Math.min(parseInt(searchParams.get('limit') || '50'), 200);
-    const offset = parseInt(searchParams.get('offset') || '0');
+    // Default page size must cover full dashboards (Office, Agents, chat) without a second request.
+    const MAX_AGENTS_PAGE = 20000
+    const DEFAULT_AGENTS_LIMIT = 2000
+    const rawLimit = searchParams.get('limit')
+    const parsedLimit = rawLimit != null ? Number.parseInt(rawLimit, 10) : DEFAULT_AGENTS_LIMIT
+    const limit = Number.isFinite(parsedLimit)
+      ? Math.min(Math.max(parsedLimit, 1), MAX_AGENTS_PAGE)
+      : DEFAULT_AGENTS_LIMIT
+    const offset = Math.max(0, Number.parseInt(searchParams.get('offset') || '0', 10) || 0)
 
     // Build dynamic query
     let query = 'SELECT * FROM agents WHERE workspace_id = ?';

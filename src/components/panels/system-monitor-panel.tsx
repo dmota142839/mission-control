@@ -186,7 +186,7 @@ export function SystemMonitorPanel() {
             {latest.cpu.cores} cores &middot; Load: {latest.cpu.loadAvg.map(l => l.toFixed(2)).join(', ')}
           </div>
           <div className="h-40">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
               <AreaChart data={history} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-20" />
                 <XAxis dataKey="time" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
@@ -222,7 +222,7 @@ export function SystemMonitorPanel() {
             )}
           </div>
           <div className="h-40">
-            <ResponsiveContainer width="100%" height="100%">
+            <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
               <AreaChart data={history} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" className="opacity-20" />
                 <XAxis dataKey="time" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
@@ -296,7 +296,7 @@ export function SystemMonitorPanel() {
               </div>
               {latest.gpu[0].memoryTotalMB > 0 && latest.gpu[0].memoryUsedMB > 0 ? (
                 <div className="h-40">
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                     <AreaChart data={history} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" className="opacity-20" />
                       <XAxis dataKey="time" tick={{ fontSize: 10 }} interval="preserveStartEnd" />
@@ -386,7 +386,7 @@ export function SystemMonitorPanel() {
                 {latest.network.map(n => n.interface).join(', ')}
               </div>
               <div className="h-40">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                   <AreaChart data={history} margin={{ top: 4, right: 4, bottom: 0, left: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" className="opacity-20" />
                     <XAxis dataKey="time" tick={{ fontSize: 10 }} interval="preserveStartEnd" />

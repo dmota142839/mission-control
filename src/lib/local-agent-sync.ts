@@ -6,6 +6,7 @@
  *   ~/.agents/         — top-level dirs with agent config files
  *   ~/.codex/agents/   — Codex agent definitions
  *   ~/.claude/agents/  — Claude agent definitions (if present)
+ *   ~/.openclaw/agency-agents/ — OpenClaw workspaces from msitarzewski/agency-agents
  *
  * A directory counts as an agent if it contains one of:
  *   AGENT.md, agent.md, soul.md, identity.md, config.json, agent.json
@@ -44,7 +45,16 @@ interface AgentRow {
 }
 
 // Detection files — order matters: first found wins for role extraction
-const IDENTITY_FILES = ['soul.md', 'AGENT.md', 'agent.md', 'identity.md', 'SKILL.md']
+// Include OpenClaw/agency-agents layout (SOUL.md, IDENTITY.md) and Linux case.
+const IDENTITY_FILES = [
+  'SOUL.md',
+  'soul.md',
+  'IDENTITY.md',
+  'identity.md',
+  'AGENT.md',
+  'agent.md',
+  'SKILL.md',
+]
 const CONFIG_FILES = ['config.json', 'agent.json']
 const ALL_MARKERS = [...IDENTITY_FILES, ...CONFIG_FILES]
 
@@ -104,6 +114,7 @@ function getLocalAgentRoots(): string[] {
     join(home, '.codex', 'agents'),
     join(home, '.claude', 'agents'),
     join(home, '.hermes', 'skills'),
+    join(home, '.openclaw', 'agency-agents'),
   ]
 }
 
@@ -247,6 +258,8 @@ export async function syncLocalAgents(): Promise<{ ok: boolean; message: string 
     let updated = 0
     let removed = 0
 
+    const globalNameStmt = db.prepare(`SELECT id, source FROM agents WHERE name = ?`)
+
     const insertStmt = db.prepare(`
       INSERT INTO agents (name, role, soul_content, status, source, content_hash, workspace_path, config, created_at, updated_at)
       VALUES (?, ?, ?, 'offline', 'local', ?, ?, ?, ?, ?)
@@ -266,6 +279,15 @@ export async function syncLocalAgents(): Promise<{ ok: boolean; message: string 
         const configJson = disk.configContent ? disk.configContent : null
 
         if (!existing) {
+          const taken = globalNameStmt.get(name) as { id: number; source: string | null } | undefined
+          // agents.name is globally unique; gateway/manual rows must win over disk duplicates
+          if (taken && taken.source !== 'local') {
+            logger.debug(
+              { name, existingSource: taken.source },
+              'Local agent sync skipped insert: name already used by non-local agent'
+            )
+            continue
+          }
           insertStmt.run(name, disk.role, disk.soulContent, disk.contentHash, disk.dir, configJson, now, now)
           created++
         } else if (existing.content_hash !== disk.contentHash) {

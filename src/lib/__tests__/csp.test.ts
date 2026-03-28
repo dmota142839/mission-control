@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
-import { buildMissionControlCsp, buildNonceRequestHeaders } from '@/lib/csp'
+import { buildMissionControlCsp, buildNonceRequestHeaders, THEME_BOOT_INLINE_SCRIPT_SHA256 } from '@/lib/csp'
 
 describe('buildMissionControlCsp', () => {
   it('includes the request nonce in script and style directives', () => {
     const csp = buildMissionControlCsp({ nonce: 'nonce-123', googleEnabled: false })
 
-    expect(csp).toContain(`script-src 'self' 'nonce-nonce-123' 'strict-dynamic'`)
+    expect(csp).toContain(`script-src 'self' 'nonce-nonce-123' 'strict-dynamic' 'sha256-${THEME_BOOT_INLINE_SCRIPT_SHA256}'`)
     expect(csp).toContain("style-src 'self' 'unsafe-inline'")
     expect(csp).toContain("style-src-elem 'self' 'unsafe-inline'")
     expect(csp).toContain("style-src-attr 'unsafe-inline'")

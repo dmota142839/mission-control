@@ -80,6 +80,28 @@ function normalizeRole(role: string | undefined): string {
 
 export function getZoneByRole(role: string | undefined): OfficeZoneDefinition {
   const normalized = normalizeRole(role)
+  // Mission Control / OpenClaw theme strings (Office panel agent.role)
+  if (normalized.includes('workflow · bug fix') || normalized.includes('workflow · feature dev')) {
+    return OFFICE_ZONES.find((z) => z.id === 'engineering')!
+  }
+  if (normalized.includes('workflow · security audit')) {
+    return OFFICE_ZONES.find((z) => z.id === 'quality')!
+  }
+  if (normalized.includes('catalog ·')) {
+    return OFFICE_ZONES.find((z) => z.id === 'research')!
+  }
+  if (normalized.includes('integration · wazo') || normalized.includes('wazo')) {
+    return OFFICE_ZONES.find((z) => z.id === 'operations')!
+  }
+  if (normalized.includes('mission control ·')) {
+    return OFFICE_ZONES.find((z) => z.id === 'operations')!
+  }
+  if (normalized.includes('core ·')) {
+    return OFFICE_ZONES.find((z) => z.id === 'product')!
+  }
+  if (normalized.includes('service ·')) {
+    return OFFICE_ZONES.find((z) => z.id === 'operations')!
+  }
   for (const zone of OFFICE_ZONES) {
     if (zone.id === 'general') continue
     if (zone.roleKeywords.some((keyword) => normalized.includes(keyword))) {

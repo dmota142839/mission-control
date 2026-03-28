@@ -140,7 +140,7 @@ function PerAgentBreakdown({
       <div className="bg-card border border-border rounded-lg p-6">
         <h2 className="text-xl font-semibold mb-4">{t('perAgentCostDB')}</h2>
         <div className="h-64">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
             <BarChart data={agents.slice(0, 12).map((a) => ({
               name: a.agent.length > 12 ? a.agent.slice(0, 11) + '\u2026' : a.agent,
               cost: Number(a.total_cost.toFixed(4)),
@@ -481,7 +481,7 @@ export function AgentCostPanel() {
                 {pieData.length === 0 ? (
                   <div className="h-full flex items-center justify-center text-muted-foreground text-sm">{t('noCostData')}</div>
                 ) : (
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                     <PieChart>
                       <Pie data={pieData} cx="50%" cy="50%" innerRadius={40} outerRadius={80} paddingAngle={5} dataKey="value">
                         {pieData.map((_, i) => (
@@ -503,7 +503,7 @@ export function AgentCostPanel() {
                 {trendData.length === 0 ? (
                   <div className="h-full flex items-center justify-center text-muted-foreground text-sm">{t('noTrendData')}</div>
                 ) : (
-                  <ResponsiveContainer width="100%" height="100%">
+                  <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                     <LineChart data={trendData}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="date" />
@@ -525,7 +525,7 @@ export function AgentCostPanel() {
             <div className="bg-card border border-border rounded-lg p-6">
               <h2 className="text-xl font-semibold mb-4">{t('costComparison')}</h2>
               <div className="h-64">
-                <ResponsiveContainer width="100%" height="100%">
+                <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={160}>
                   <BarChart data={sortedAgents.slice(0, 10).map(([name, a]) => ({
                     name: name.length > 12 ? name.slice(0, 11) + '…' : name,
                     cost: Number(a.stats.totalCost.toFixed(4)),

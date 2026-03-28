@@ -111,6 +111,32 @@ Run "openclaw doctor --fix" to apply changes.
     expect(result.raw).not.toContain('Multiple state directories detected')
   })
 
+  it('does not treat Plugins "Errors: 0" as a fatal error (substring false positive)', () => {
+    const result = parseOpenClawDoctorOutput(`
+◇  Plugins
+│  Errors: 0     │
+Doctor complete.
+`, 0)
+
+    expect(result.level).toBe('healthy')
+    expect(result.level).not.toBe('error')
+  })
+
+  it('hides banner for advisory session locks / gateway LAN notices (exit 0)', () => {
+    const result = parseOpenClawDoctorOutput(`
+◇  Security
+│  - WARNING: Gateway bound to "lan" (0.0.0.0) (network-accessible).
+◇  Session locks
+│  - Found 1 session lock file.
+Doctor complete.
+`, 0)
+
+    expect(result.level).toBe('healthy')
+    expect(result.level).not.toBe('error')
+    expect(result.healthy).toBe(true)
+    expect(result.issues).toEqual([])
+  })
+
   it('marks clean output as healthy', () => {
     const result = parseOpenClawDoctorOutput('OK: configuration valid', 0)
 

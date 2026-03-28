@@ -226,7 +226,17 @@ export default function Home() {
         }
         return null
       })
-      .then(data => { if (data?.user) setCurrentUser(data.user); markStep('auth') })
+      .then(data => {
+        if (data?.user) {
+          setCurrentUser(data.user)
+          const s = useMissionControl.getState()
+          if (s.defaultOrgName === 'Default') {
+            const label = data.user.display_name?.trim() || data.user.username
+            if (label) s.setDefaultOrgName(label)
+          }
+        }
+        markStep('auth')
+      })
       .catch(() => { markStep('auth') })
 
     // Check for available updates
@@ -336,7 +346,7 @@ export default function Home() {
       fetch('/api/agents')
         .then(r => r.ok ? r.json() : null)
         .then((agentsData) => {
-          if (agentsData?.agents) setAgents(agentsData.agents)
+          if (Array.isArray(agentsData?.agents)) setAgents(agentsData.agents)
         })
         .finally(() => { markStep('agents') }),
       fetch('/api/sessions')

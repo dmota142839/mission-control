@@ -76,7 +76,7 @@ export function ChatWorkspace({ mode = 'embedded', onClose }: ChatWorkspaceProps
         const res = await fetch('/api/agents')
         if (!res.ok) return
         const data = await res.json()
-        if (data.agents) setAgents(data.agents)
+        if (Array.isArray(data.agents)) setAgents(data.agents)
       } catch (err) {
         log.error('Failed to load agents:', err)
       }
